@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Logs | Face Recognizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .glass-panel {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37),
+        inset 0 0 15px rgba(255, 255, 255, 0.05);
+    }
+
+    .glass-header {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .bg-royal {
+      background: radial-gradient(circle at 50% 50%, #1e3a8a 0%, #0f172a 60%, #020617 100%);
+    }
+
+    @keyframes pulse-slow {
+
+      0%,
+      100% {
+        opacity: .2;
+        transform: translate(-50%, -50%) rotate(45deg) scale(1);
+      }
+
+      50% {
+        opacity: .5;
+        transform: translate(-50%, -50%) rotate(45deg) scale(1.05);
+      }
+    }
+
+    .diamond-glow {
+      animation: pulse-slow 8s infinite ease-in-out;
+    }
+
+    /* Selected navigation tab */
+    .nav-active {
+      background: linear-gradient(to right, #2563eb, #3b82f6);
+      color: white;
+    }
+
+    /* Custom Input Style */
+    .input-glass {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .input-glass:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #60a5fa;
+      outline: none;
+      box-shadow: 0 0 15px rgba(96, 165, 250, 0.3);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+
+<body class="bg-royal h-screen text-slate-200 flex justify-center items-start overflow-hidden">
+
+  <!-- Background -->
+  <div class="fixed inset-0 pointer-events-none">
+    <div class="diamond-glow absolute top-1/2 left-1/2 w-[700px] h-[700px] border-2 border-blue-400/30 rotate-45"></div>
+    <div class="diamond-glow absolute top-1/2 left-1/2 w-[450px] h-[450px] border border-blue-300/20 rotate-45"
+      style="animation-delay:2s"></div>
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full">
+    </div>
+  </div>
+
+  <!-- MAIN UI -->
+  <div class="relative z-10 w-[1600px] h-[100vh] flex flex-col gap-6 p-8">
+
+    <!-- Header -->
+    <header class="glass-header h-24 rounded-3xl flex items-center justify-between px-12 shadow-2xl">
+      <h1 class="text-3xl font-extrabold tracking-[0.2em] uppercase text-white">Face Recognizer</h1>
+      <div class="flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full border-2 border-blue-400 flex items-center justify-center shadow-[0_0_15px_rgba(96,165,250,0.5)]">
+          <svg class="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M12 12c2.7 0 4.5-1.8 4.5-4.5S14.7 3 12 3 7.5 4.8 7.5 7.5 9.3 12 12 12Zm0 2.25c-3 0-9 1.5-9 4.5V21h18v-2.25c0-3-6-4.5-9-4.5Z" />
+          </svg>
+        </div>
+        <!-- <p class="text-sm font-bold uppercase tracking-wider text-white">Admin</p> -->
+      </div>
+    </header>
+
+    <div class="flex flex-1 gap-8 overflow-hidden">
+
+      <!-- Navigation Panel -->
+      <aside class="w-80 glass-panel rounded-[2rem] p-8 flex flex-col">
+        <nav class="space-y-4">
+          <button
+            class="nav-active nav-tab w-full px-6 py-5 rounded-2xl font-bold uppercase text-xs tracking-widest transition-all">
+            Attendance
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Content -->
+      <main class="flex-1 glass-panel rounded-[2.5rem] px-10 py-8 flex flex-col overflow-hidden">
+
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+            Attendance Logs
+          </h2>
+          <button id="generateReportBtn"
+            class="h-12 px-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold uppercase text-xs tracking-wider transition-all shadow-lg shadow-indigo-600/20 border border-indigo-400/20">
+            Generate Report
+          </button>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="flex flex-wrap gap-4 mb-8 bg-white/5 p-4 rounded-2xl border border-white/10">
+          <div class="flex flex-col gap-1">
+            <label class="text-[10px] uppercase tracking-wider text-slate-400 font-bold ml-1">Date</label>
+            <input type="date" id="filterDate"
+              class="input-glass h-12 rounded-xl px-4 w-48 font-mono text-sm [color-scheme:dark]">
+          </div>
+
+          <div class="flex flex-col gap-1 flex-1">
+            <label class="text-[10px] uppercase tracking-wider text-slate-400 font-bold ml-1">Member Name</label>
+            <input type="text" id="filterName"
+              class="input-glass h-12 rounded-xl px-4 w-full text-sm placeholder-slate-500"
+              placeholder="Search by name...">
+          </div>
+
+          <div class="flex flex-col gap-1 w-[15%]">
+            <label class="text-[10px] uppercase tracking-wider text-slate-400 font-bold ml-1">
+              Club
+            </label>
+            <select id="filterClub" class="appearance-none input-glass h-12 rounded-xl px-4 text-sm">
+              <option class="text-black" value="">All Clubs</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col justify-end">
+            <button onclick="filterByDate()"
+              class="h-12 px-8 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold uppercase text-xs tracking-wider transition-all shadow-lg shadow-blue-600/20 border border-blue-400/20">
+              Submit
+            </button>
+          </div>
+
+          <div class="flex flex-col justify-end">
+            <button onclick="resetFilter()"
+              class="h-12 px-6 bg-white/5 hover:bg-white/10 text-slate-300 rounded-xl font-bold uppercase text-xs tracking-wider transition-all border border-white/10">
+              Reset
+            </button>
+          </div>
+
+          <div class="flex flex-col justify-end">
+            <button onclick="refreshPage()"
+              class="h-12 px-6 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl font-bold uppercase text-xs tracking-wider transition-all">
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- DATA AREA -->
+        <div id="recognitionContainer" class="flex-1 overflow-y-auto space-y-6 pr-2">
+          <!-- Initial State -->
+          <div class="flex flex-col items-center justify-center h-full text-slate-500 opacity-60">
+            <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p>Please select a date to view recognition logs.</p>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    async function filterByDate() {
+      const selectedDate = document.getElementById("filterDate").value;
+      const container = document.getElementById("recognitionContainer");
+      const selectedClub = document.getElementById("filterClub").value;
+
+      if (!selectedDate) {
+        alert("Please select a date first!");
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center h-full text-blue-300 animate-pulse">
+            <p>Loading data...</p>
+        </div>`;
+
+      try {
+        const selectedName = document.getElementById("filterName").value.trim();
+        const response = await fetch("/recognitions/datewise", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            date: selectedDate,
+            name: selectedName,
+            club_id: selectedClub || null
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.status && Object.keys(result.data).length > 0) {
+          renderData(result.data);
+        } else {
+          container.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-slate-400">
+                <p>No logs found for ${selectedDate}.</p>
+            </div>`;
+        }
+      } catch (error) {
+        console.error(error);
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-red-400">
+                <p>⚠️ Failed to load data.</p>
+            </div>`;
+      }
+    }
+
+    function renderData(data) {
+      const container = document.getElementById("recognitionContainer");
+      container.innerHTML = "";
+
+      for (const [date, logs] of Object.entries(data)) {
+        // Create Section Block
+        const section = document.createElement("div");
+        section.className = "bg-white/[0.02] border border-white/10 rounded-3xl p-6 shadow-xl";
+
+        // Header for Date Group
+        const headerHTML = `
+            <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-4">
+                <h3 class="text-xl font-bold text-blue-200 tracking-wide">${date}</h3>
+                <span class="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-blue-500/30">
+                    ${logs.length} Members
+                </span>
+            </div>
+        `;
+
+        // Table / List
+        let rowsHTML = "";
+
+        if (logs.length > 0) {
+          // Header Row
+          rowsHTML += `
+                <div class="flex items-center px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold mb-2">
+                    <div class="w-12">Sr. No.</div>
+                    <div class="flex-1">Member Name</div>
+                    <div class="w-48 text-center">Member ID</div>
+                    <div class="w-32 text-right">Service Time</div>
+                </div>
+            `;
+
+          // Loop Rows
+          logs.forEach((log, index) => {
+            rowsHTML += `
+                    <div class="flex items-center justify-between bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 rounded-xl px-6 py-4 mb-2 transition-all group">
+                        <div class="w-12">
+                            <span class="text-slate-400 font-mono text-sm">${index + 1}</span>
+                        </div>
+                        <div class="flex-1">
+                            <span class="text-white font-semibold text-lg group-hover:text-blue-200 transition-colors">${log.name || "-"}</span>
+                        </div>
+                        <div class="w-48 text-center">
+                            <span class="text-emerald-400 font-black uppercase tracking-widest text-sm">${log.member_code || "-"}</span>
+                        </div>
+                        <div class="w-32 text-right">
+                            <span class="font-mono text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded text-sm border border-emerald-400/20">${log.time || "-"}</span>
+                        </div>
+                    </div>
+                `;
+          });
+        } else {
+          rowsHTML = `<div class="text-center py-6 text-slate-500">No data available</div>`;
+        }
+
+        section.innerHTML = headerHTML + `<div class="flex flex-col">` + rowsHTML + `</div>`;
+        container.appendChild(section);
+      }
+    }
+
+    function resetFilter() {
+      document.getElementById("filterDate").value = "";
+      document.getElementById("filterName").value = "";
+      document.getElementById("recognitionContainer").innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-slate-500 opacity-60">
+                <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <p>Please select a date to view recognition logs.</p>
+            </div>`;
+    }
+
+    function refreshPage() {
+      location.reload();
+    }
+
+    // Automatically load today's attendance on page load
+    window.addEventListener('DOMContentLoaded', () => {
+
+      loadClubsForFilter();
+
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const dateString = `${year}-${month}-${day}`;
+
+      const dateInput = document.getElementById("filterDate");
+      if (dateInput) {
+        dateInput.value = dateString;
+        filterByDate();
+      }
+    });
+
+    async function loadClubsForFilter() {
+      try {
+        const res = await fetch("/api/clubs/list");
+        const data = await res.json();
+
+        const clubSelect = document.getElementById("filterClub");
+        if (!clubSelect || !data.clubs) return;
+
+        data.clubs.forEach(club => {
+          const option = document.createElement("option");
+          option.value = club.id;
+          option.textContent = club.club_name;
+          option.classList.add("text-black");
+          clubSelect.appendChild(option);
+        });
+      } catch (err) {
+        console.error("Failed to load clubs", err);
+      }
+    }
+
+    document.getElementById("generateReportBtn").addEventListener("click", async () => {
+      const selectedDate = document.getElementById("filterDate").value;
+      const selectedName = document.getElementById("filterName").value.trim();
+      const selectedClubSelect = document.getElementById("filterClub");
+      const selectedClubName = selectedClubSelect.options[selectedClubSelect.selectedIndex]?.text || "All Clubs";
+
+      if (!selectedDate) {
+        alert("Please select a date first!");
+        return;
+      }
+
+      try {
+        const response = await fetch("/recognitions/datewise", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            date: selectedDate,
+            name: selectedName || null,
+            club_id: selectedClubSelect.value || null
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!result.status || Object.keys(result.data).length === 0) {
+          alert("No data available to generate report.");
+          return;
+        }
+
+        // Flatten data and add Sr. No
+        const excelData = [];
+        let srNo = 1;
+        for (const [date, logs] of Object.entries(result.data)) {
+          logs.forEach(log => {
+            excelData.push({
+              "Sr. No.": srNo++,
+              "Member Name": log.name || "-",
+              "Member ID": log.member_code || "-",
+              "Service Time": log.time || "-"
+            });
+          });
+        }
+
+        // Create worksheet starting at row 5 for table data
+        const ws = XLSX.utils.json_to_sheet(excelData, { origin: 4 });
+
+        // Add header rows at top
+        const headerRows = [
+          ["Face Recognition App"],
+          ["Attendance Log"],
+          [`Date: ${selectedDate}`],
+          [`Club: ${selectedClubName}`]
+        ];
+        XLSX.utils.sheet_add_aoa(ws, headerRows, { origin: 0 });
+
+        // Merge header cells
+        ws['!merges'] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+          { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+          { s: { r: 2, c: 0 }, e: { r: 2, c: 3 } },
+          { s: { r: 3, c: 0 }, e: { r: 3, c: 3 } },
+        ];
+
+        // Set column widths
+        ws['!cols'] = [
+          { wpx: 60 },  // Sr. No.
+          { wpx: 200 }, // Member Name
+          { wpx: 150 }, // Member ID
+          { wpx: 120 }  // Service Time
+        ];
+
+        // Styling helper function
+        function createCellStyle(opts = {}) {
+          return {
+            font: {
+              name: "Times New Roman",
+              sz: opts.size || 12,
+              bold: !!opts.bold,
+              color: { rgb: opts.fontColor || "000000" }
+            },
+            alignment: {
+              horizontal: opts.hAlign || "center",
+              vertical: opts.vAlign || "center",
+              wrapText: true,
+            },
+            fill: opts.fill ? { fgColor: { rgb: opts.fill } } : undefined,
+            border: {
+              top: { style: "thin", color: { rgb: "CCCCCC" } },
+              bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+              left: { style: "thin", color: { rgb: "CCCCCC" } },
+              right: { style: "thin", color: { rgb: "CCCCCC" } }
+            }
+          };
+        }
+
+        // Apply styles for header rows (0-3)
+        for (let r = 0; r <= 3; r++) {
+          for (let c = 0; c <= 3; c++) {
+            const cellAddress = XLSX.utils.encode_cell({ r, c });
+            if (!ws[cellAddress]) continue;
+
+            ws[cellAddress].s = createCellStyle({
+              size: 16,
+              bold: true,
+              fontColor: "FFFFFF",
+              fill: "003366", // Dark blue background
+              hAlign: "center",
+              vAlign: "center"
+            });
+          }
+        }
+
+        // Apply styles for table header row (row 4)
+        for (let c = 0; c <= 3; c++) {
+          const cellAddress = XLSX.utils.encode_cell({ r: 4, c });
+          if (!ws[cellAddress]) continue;
+
+          ws[cellAddress].s = createCellStyle({
+            size: 12,
+            bold: true,
+            fontColor: "FFFFFF",
+            fill: "336699", // Lighter blue background
+            hAlign: "center",
+            vAlign: "center"
+          });
+        }
+
+        // Apply styles for data rows starting from row 5
+        const startDataRow = 5;
+        const totalRows = startDataRow + excelData.length;
+        for (let r = startDataRow; r < totalRows; r++) {
+          const isEven = (r - startDataRow) % 2 === 0;
+          const bgColor = isEven ? "FFFFFF" : "F0F0F0"; // white and light gray
+
+          for (let c = 0; c <= 3; c++) {
+            const cellAddress = XLSX.utils.encode_cell({ r, c });
+            if (!ws[cellAddress]) continue;
+
+            ws[cellAddress].s = createCellStyle({
+              fontColor: "000000",
+              fill: bgColor,
+              hAlign: "center",
+              vAlign: "center"
+            });
+          }
+        }
+
+        // Create workbook and add worksheet
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Attendance");
+
+        // Write file
+        XLSX.writeFile(wb, `Attendance_Report_${selectedDate}.xlsx`);
+
+      } catch (err) {
+        console.error("Failed to generate report:", err);
+        alert("Failed to generate report. See console for details.");
+      }
+    });
+
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home | Face Recognizer</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .bg-royal {
+      background: radial-gradient(circle at 50% 50%, #1e3a8a 0%, #0f172a 60%, #020617 100%);
+    }
+
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.45);
+    }
+
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        opacity: .25;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      50% {
+        opacity: .5;
+        transform: translate(-50%, -50%) scale(1.08);
+      }
+    }
+
+    .orb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: 0;
+    }
+  </style>
+</head>
+
+<body class="bg-royal min-h-screen flex items-center justify-center text-white overflow-hidden relative">
+
+  <!-- Ambient Orbs -->
+  <div class="orb w-[450px] h-[450px] bg-blue-600/20 animate-[pulse-glow_7s_ease-in-out_infinite]"></div>
+  <div class="orb w-[350px] h-[350px] bg-indigo-500/10 animate-[pulse-glow_9s_ease-in-out_infinite_reverse]"
+    style="animation-delay:1s"></div>
+
+  <!-- Content -->
+  <div class="relative z-10 glass-card w-full max-w-lg rounded-[2rem] p-10 text-center">
+
+    <!-- Icon -->
+    <div
+      class="w-14 h-14 mx-auto mb-6 rounded-2xl bg-blue-500/10 border border-blue-400/30 flex items-center justify-center shadow-[0_0_18px_rgba(59,130,246,0.35)]">
+      <svg class="w-7 h-7 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z" />
+      </svg>
+    </div>
+
+    <!-- Message -->
+    <h1 class="text-xl font-bold tracking-wide mb-2">
+      No Club Assigned
+    </h1>
+
+    <p class="text-sm text-slate-400 leading-relaxed max-w-sm mx-auto">
+      You are currently not assigned to any club.
+    </p>
+    <p class="text-sm text-slate-400 leading-relaxed max-w-sm mx-auto">
+      Please contact the Admin to gain access to application features.
+    </p>
+
+    <!-- Divider -->
+    <div class="my-8 h-px bg-white/10"></div>
+
+    <!-- Logout -->
+    <button onclick="window.location.href='/logout'"
+      class="px-8 py-3 bg-gradient-to-r from-red-500/80 to-red-600/80 hover:from-red-500 hover:to-red-600 rounded-xl text-sm font-bold uppercase tracking-wider shadow-[0_4px_18px_rgba(239,68,68,0.4)] transition-all active:scale-[0.97]">
+      Logout
+    </button>
+
+    <p class="mt-5 text-xs text-slate-500">
+      You can log back in after being assigned to a club
+    </p>
+
+  </div>
+
+</body>
+
+</html>

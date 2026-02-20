@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Face Recognition System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f0f2f5;
+    }
+
+    .container {
+      max-width: 600px;
+    }
+
+    .card {
+      border: none;
+      border-radius: 12px;
+    }
+
+    .attendance-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: #f0fff0; /* Very light green */
+      border: 2px solid #28a745; /* Green border */
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    .checkmark {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #28a745;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .preview-img-container {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .preview-img {
+      max-width: 250px;
+      max-height: 250px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      object-fit: cover;
+      display: inline-block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Face Recognition System</h2>
+  <div class="card p-4 shadow-sm">
+
+    <form id="uploadForm">
+      <div class="mb-3">
+        <label for="fileInput" class="form-label">Upload an image:</label>
+        <input class="form-control" type="file" id="fileInput" name="file" accept="image/*" required>
+        <div id="previewContainer" class="preview-img-container d-none">
+          <img id="preview" class="preview-img" alt="Uploaded Preview">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Submit</button>
+    </form>
+
+    <div id="result" class="mt-3"></div>
+
+  </div>
+</div>
+
+<script>
+const fileInput = document.getElementById("fileInput");
+const previewImg = document.getElementById("preview");
+const previewContainer = document.getElementById("previewContainer");
+const resultDiv = document.getElementById("result");
+const uploadForm = document.getElementById("uploadForm");
+
+// Show image preview
+fileInput.addEventListener("change", function () {
+  if (fileInput.files && fileInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      previewImg.src = e.target.result;
+      previewContainer.classList.remove("d-none");
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    previewContainer.classList.add("d-none");
+    previewImg.src = "";
+  }
+});
+
+// Handle form submission
+uploadForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+  resultDiv.innerHTML = "";
+
+  if (!fileInput.files.length) {
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/recognize", {  // <-- Use your FastAPI port
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.faces && data.faces.length > 0) {
+      const face = data.faces[0]; // take first detected face
+      const name = face.name || "Unknown";
+      const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+      resultDiv.innerHTML = `
+        <div class="attendance-card">
+          <div class="checkmark">✓</div>
+          <div>
+            <h5 class="mb-0">${name}</h5>
+            <small class="text-muted">Marked Attendance at ${time}</small>
+          </div>
+        </div>
+      `;
+    } else {
+      resultDiv.innerHTML = `
+        <div class="alert alert-danger mt-3">
+          No face recognized.
+        </div>
+      `;
+    }
+  } catch (error) {
+    resultDiv.innerHTML = `
+      <div class="alert alert-danger mt-3">
+        Error: Could not connect to the recognition service.
+      </div>
+    `;
+  }
+});
+</script>
+
+</body>
+</html>

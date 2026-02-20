@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .glass-panel {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37),
+        inset 0 0 15px rgba(255, 255, 255, 0.05);
+    }
+
+    .glass-header {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .bg-royal {
+      background: radial-gradient(circle at 50% 50%, #1e3a8a 0%, #0f172a 60%, #020617 100%);
+    }
+
+    @keyframes pulse-slow {
+
+      0%,
+      100% {
+        opacity: .2;
+        transform: translate(-50%, -50%) rotate(45deg) scale(1);
+      }
+
+      50% {
+        opacity: .5;
+        transform: translate(-50%, -50%) rotate(45deg) scale(1.05);
+      }
+    }
+
+    .diamond-glow {
+      animation: pulse-slow 8s infinite ease-in-out;
+    }
+
+    /* Selected navigation tab */
+    .nav-active {
+      background: linear-gradient(to right, #2563eb, #3b82f6);
+      color: white;
+    }
+  </style>
+</head>
+
+<body class="bg-royal h-screen text-slate-200 flex justify-center items-start overflow-hidden">
+
+  <!-- Background -->
+  <div class="fixed inset-0 pointer-events-none">
+    <div class="diamond-glow absolute top-1/2 left-1/2 w-[700px] h-[700px] border-2 border-blue-400/30 rotate-45"></div>
+    <div class="diamond-glow absolute top-1/2 left-1/2 w-[450px] h-[450px] border border-blue-300/20 rotate-45"
+      style="animation-delay:2s"></div>
+    <div
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full">
+    </div>
+  </div>
+
+  <!-- MAIN UI -->
+  <div class="relative z-10 w-[1600px] h-[100vh] flex flex-col gap-6 p-8">
+
+    <!-- Header -->
+    <header class="glass-header h-24 rounded-3xl flex items-center justify-between px-12 shadow-2xl">
+      <h1 class="text-3xl font-extrabold tracking-[0.2em] uppercase text-white">Face Recognizer</h1>
+      <div class="flex items-center gap-4">
+        <div
+          class="w-12 h-12 rounded-full border-2 border-blue-400 flex items-center justify-center shadow-[0_0_15px_rgba(96,165,250,0.5)]">
+          <svg class="w-6 h-6 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M12 12c2.7 0 4.5-1.8 4.5-4.5S14.7 3 12 3 7.5 4.8 7.5 7.5 9.3 12 12 12Zm0 2.25c-3 0-9 1.5-9 4.5V21h18v-2.25c0-3-6-4.5-9-4.5Z" />
+          </svg>
+        </div>
+        <p class="text-sm font-bold uppercase tracking-wider text-white">Admin</p>
+      </div>
+    </header>
+
+    <div class="flex flex-1 gap-8 overflow-hidden">
+
+      <!-- Navigation Panel -->
+      <aside class="w-80 glass-panel rounded-[2rem] p-8 flex flex-col">
+        <nav class="space-y-4">
+          <button id="usersTab" type="button" onclick="console.log('Employees tab clicked (HTML)')"
+            class="nav-tab w-full px-6 py-5 rounded-2xl font-bold uppercase text-xs tracking-widest">
+            Employees
+          </button>
+          <button id="clubTab" type="button" onclick="console.log('Club tab clicked (HTML)')"
+            class="nav-tab w-full px-6 py-5 rounded-2xl font-bold uppercase text-xs tracking-widest">
+            Club
+          </button>
+          <button id="attendanceTab" type="button" onclick="console.log('Attendance tab clicked (HTML)')"
+            class="nav-tab w-full px-6 py-5 rounded-2xl font-bold uppercase text-xs tracking-widest">
+            Attendance
+          </button>
+          <button id="scanTab" type="button" onclick="console.log('Scan tab clicked (HTML)')"
+            class="nav-tab w-full px-6 py-5 rounded-2xl font-bold uppercase text-xs tracking-widest hidden">
+            Scan
+          </button>
+          <button id="logoutTab" type="button" onclick="console.log('Logout clicked (HTML)')"
+            class="nav-tab w-full px-6 py-5 rounded-2xl font-bold uppercase text-xs tracking-widest">
+            Logout
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Content -->
+      <main class="flex-1 glass-panel rounded-[2.5rem] px-10 py-6 flex flex-col overflow-hidden">
+
+
+
+
+        <!--------------------------------- Employee Section ------------------------------------->
+
+
+        <section id="employeesSection" class="flex flex-col flex-1 overflow-hidden">
+          <!-- Actions -->
+          <div class="flex justify-between items-center gap-12 mb-6 flex-shrink-0">
+            <h2 class="text-2xl font-bold text-white uppercase tracking-wider">Employees</h2>
+            <button id="addUserBtn"
+              class="bg-blue-500/10 border border-blue-400/30 px-6 py-4 rounded-2xl text-blue-300 font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-blue-400 hover:text-white transition-all">
+              Add Employees
+            </button>
+          </div>
+
+          <!-- DATA AREA -->
+          <div id="dataArea"
+            class="flex flex-col flex-1 border border-white/20 rounded-2xl p-2 space-y-2 overflow-y-auto">
+
+            <!-- Header Row -->
+            <div class="flex items-center text-[10px] uppercase tracking-[0.3em] text-slate-400 px-4">
+              <div class="w-16">ID</div>
+              <div class="flex-1">Name</div>
+              <div class="w-48 text-center">Member ID</div>
+              <div class="w-16 text-center">Img</div>
+            </div>
+
+            <!-- Data rows will be injected here -->
+            <div id="userRows" class="flex flex-col space-y-2 px-4"></div>
+
+          </div>
+        </section>
+
+
+
+
+
+
+        <!-------------------------------------- Club Section -------------------------------------------->
+
+
+        <section id="clubSection" class="flex flex-col flex-1 overflow-hidden hidden">
+
+          <!-- Club Header -->
+          <div class="flex justify-between items-center gap-12 mb-6 flex-shrink-0">
+            <h2 class="text-2xl font-bold text-white uppercase tracking-wider">Clubs</h2>
+            <button id="addClubBtn"
+              class="bg-blue-500/10 border border-blue-400/30 px-6 py-4 rounded-2xl text-blue-300 font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-blue-400 hover:text-white transition-all">
+              Add Club
+            </button>
+          </div>
+
+          <!-- Club Cards Container -->
+          <div id="clubCards"
+            class="flex flex-col flex-1 border border-white/20 rounded-2xl p-4 space-y-4 overflow-y-auto">
+
+            <!-- Single Club Card -->
+            <div
+              class="club-card glass-panel p-2 rounded-3xl cursor-pointer hover:bg-white/5 transition flex flex-col justify-between">
+
+              <!-- Club Details Row -->
+              <div class="flex justify-between items-center">
+                <div class="mx-2 px-1">
+                  <p class="text-slate-300 text-sm">FC001</p>
+                  <h3 class="text-xl font-bold text-white">Football Club</h3>
+                </div>
+
+                <!-- Edit + Delete Buttons -->
+                <div class="flex px-1 mx-2 gap-10">
+                  <button
+                    class="editClub text-green-400 hover:text-blue-300 transition-all text-lg font-bold">✎</button>
+                  <button
+                    class="deleteClub text-red-400 hover:text-red-500 transition-all text-lg font-bold">🗑️</button>
+                  <button
+                    class="save-btn text-green-400 hover:text-green-500 transition-all text-lg font-bold">💾</button>
+                  <button class="cancel-btn text-red-400 hover:text-red-500 transition-all text-lg font-bold">❌</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+      </main>
+    </div>
+  </div>
+
+
+
+
+
+
+  <!-------------------------------------------------------- Modals ------------------------------------------->
+
+
+  <!--------- "Add Club" Modal ------------>
+  <div id="addClubModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="glass-panel w-[400px] max-w-[90%] rounded-3xl p-6 relative flex flex-col gap-4">
+
+      <!-- Close Button -->
+      <button id="closeAddClubModal" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+
+      <!-- Modal Title -->
+      <h2 id="clubModalTitle" class="text-xl font-bold text-white">Add New Club</h2>
+
+      <!-- Club Name Input -->
+      <div class="flex flex-col gap-2">
+        <label for="newClubName" class="text-slate-400 text-xs uppercase tracking-wide">Club Name</label>
+        <input id="newClubName" type="text"
+          class="w-full p-2 rounded-lg bg-white/5 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:border-blue-400"
+          placeholder="Enter Name">
+      </div>
+
+      <!-- Club Code Input -->
+      <div class="flex flex-col gap-2">
+        <label for="newClubCode" class="text-slate-400 text-xs uppercase tracking-wide">Club Code</label>
+        <input id="newClubCode" type="text"
+          class="w-full p-2 rounded-lg bg-white/5 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:border-blue-400"
+          placeholder="Enter 6-digit Code">
+      </div>
+
+      <div id="clubModalActions">
+        <!-- Add Button -->
+        <button id="addNewClubBtn"
+          class="mt-2 bg-blue-500/10 border border-blue-400/30 px-4 py-2 rounded-xl text-blue-300 text-xs uppercase hover:bg-blue-400 hover:text-white transition-all">
+          Add
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <!------------- "Club User" Modal -------------->
+  <div id="clubModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+    <div class="glass-panel w-full max-w-[500px] h-[80vh] rounded-3xl p-6 flex flex-col overflow-hidden">
+
+      <!-- Club Name at Top -->
+      <h2 id="clubNameDisplay" class="text-2xl font-extrabold text-white mb-4 text-center">
+        Football Club
+      </h2>
+
+      <!-- User Details Section -->
+      <div class="flex-1 flex flex-col overflow-hidden glass-panel p-4 rounded-2xl border border-white/20">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-lg font-bold text-white">User Details</h3>
+          <button id="addUserToClub"
+            class="bg-blue-500/20 border border-blue-400/50 px-4 py-2 rounded-xl text-blue-300 font-bold uppercase text-xs hover:bg-blue-400 hover:text-white hover:scale-105 transition-all shadow-sm">
+            + Add User
+          </button>
+        </div>
+
+        <!-- Users List (Scrollable) -->
+        <div class="flex-1 overflow-y-auto flex flex-col gap-3 pr-2">
+
+          <!-- User Card -->
+          <div
+            class="flex justify-between items-start bg-blue-900/40 backdrop-blur-md p-4 rounded-xl border border-blue-700/30 hover:bg-blue-900/50 transition-all relative">
+
+            <!-- User Info -->
+            <div class="flex flex-col gap-2 w-full">
+              <!-- Name -->
+              <div class="flex flex-col">
+                <label class="text-slate-400 text-xs uppercase tracking-wide">Name</label>
+                <span class="text-white font-semibold text-sm">John Doe</span>
+              </div>
+
+              <!-- Username -->
+              <div class="flex flex-col">
+                <label class="text-slate-400 text-xs uppercase tracking-wide">Username</label>
+                <span class="text-white font-semibold text-sm">johndoe</span>
+              </div>
+
+              <!-- Password -->
+              <div class="flex flex-col">
+                <label class="text-slate-400 text-xs uppercase tracking-wide">Password</label>
+                <span class="text-white font-semibold text-sm">••••••••</span>
+              </div>
+
+              <!-- Mobile -->
+              <div class="flex flex-col">
+                <label class="text-slate-400 text-xs uppercase tracking-wide">Mobile</label>
+                <span class="text-white font-semibold text-sm">+1 234 567 890</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-start gap-5 ml-4">
+              <button class="editUser text-green-400 hover:text-blue-300 font-bold text-lg">✎</button>
+              <button class="deleteUser text-red-400 hover:text-red-500 font-bold text-lg">🗑️</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Close Modal Button -->
+      <button id="closeClubModal" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">
+        ✕
+      </button>
+    </div>
+  </div>
+
+
+
+
+
+  <!----------------------------------------- JS ---------------------------------------------------->
+  <script src="/static/js/admin.js?v=1.1"></script>
+</body>
+
+</html>
