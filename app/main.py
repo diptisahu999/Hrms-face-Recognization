@@ -59,6 +59,10 @@ def make_response(status, code, flag, message, data=None):
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/punch", response_class=HTMLResponse)
+async def recognize_page(request: Request):
+    return templates.TemplateResponse("recognize.html", {"request": request})
+
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})

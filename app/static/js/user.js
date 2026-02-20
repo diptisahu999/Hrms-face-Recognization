@@ -12,6 +12,7 @@ const usersTab = document.getElementById("usersTab");
 const clubTab = document.getElementById("clubTab");
 const attendanceTab = document.getElementById("attendanceTab");
 const scanTab = document.getElementById("scanTab");
+const punchTab = document.getElementById("punchTab");
 const logoutTab = document.getElementById("logoutTab");
 
 const employeesSection = document.getElementById("employeesSection");
@@ -190,6 +191,7 @@ if (attendanceTab) {
 if (scanTab) {
   scanTab.addEventListener("click", () => { window.location.href = "/scan"; });
 }
+
 
 if (logoutTab) {
   logoutTab.addEventListener("click", () => { window.location.href = "/logout"; });
