@@ -98,6 +98,7 @@ async def get_all_employee(db: AsyncSession):
             models.Employee.id,
             models.Employee.name,
             models.Employee.member_code,
+            models.Employee.image_path
         )
     )
     return result.all()

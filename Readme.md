@@ -41,4 +41,4 @@ alembic revision --autogenerate -m "migration_name"
 alembic upgrade head
 
 # Run the server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 9000
