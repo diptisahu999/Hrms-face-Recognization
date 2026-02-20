@@ -197,18 +197,25 @@ async def delete_employee(employee_id: str, db: AsyncSession = Depends(get_db)):
         content=make_response(1, 1, True, message)
     )
 
-@app.get("/employees", response_model=schemas.EmployeeListResponse)
-async def list_employees(db: AsyncSession = Depends(get_db)):
+@app.get("/employees")
+async def list_employees(
+    page: int = 1,
+    size: int = 7,
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Returns a list of all registered employees with their ID, name, and member code.
+    Returns a paginated list of all registered employees with their ID, name, and member code.
     """
-    # To fetch employees with image
-    # employees_from_db = await crud.get_all_employees(db)
+    skip = (page - 1) * size
+    employees_from_db = await crud.get_all_employee(db, skip=skip, limit=size)
+    total_count = await crud.get_employee_count(db)
     
-    # To fetch employees without image
-    employees_from_db = await crud.get_all_employee(db)
-    
-    return {"employees": employees_from_db}
+    return {
+        "employees": employees_from_db,
+        "total": total_count,
+        "page": page,
+        "size": size
+    }
 
 
 ##########  employee recognisation ################

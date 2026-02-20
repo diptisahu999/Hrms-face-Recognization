@@ -35,10 +35,21 @@ const closeClubModal = document.getElementById("closeClubModal");
 const clubNameDisplay = document.getElementById("clubNameDisplay");
 const addUserToClubBtn = document.getElementById("addUserToClub");
 
+// --- Pagination Elements ---
+const prevPageBtn = document.getElementById("prevPage");
+const nextPageBtn = document.getElementById("nextPage");
+const currentPageNumDisplay = document.getElementById("currentPageNum");
+const totalPageNumDisplay = document.getElementById("totalPageNum");
+
 // --- State Variables ---
 let activeClubId = null;
 let activeClubName = null;
 let editingClubId = null;
+
+// --- Pagination State ---
+let currentPage = 1;
+const pageSize = 7;
+let totalEmployees = 0;
 
 // --- Section Switching Logic ---
 function showSection(targetSection) {
@@ -66,7 +77,8 @@ function setActiveTab(activeTab) {
 if (usersTab) {
   setActiveTab(usersTab);
   showSection(employeesSection);
-  fetchUsers();
+  currentPage = 1;
+  fetchUsers(currentPage);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -82,16 +94,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // --- User Management Functions ---
-async function fetchUsers() {
+async function fetchUsers(page = 1) {
   if (!userRows) return;
   userRows.innerHTML = `<p class="text-center text-slate-400 py-4">Loading users...</p>`;
   try {
-    const res = await fetch("/employees");
+    const res = await fetch(`/employees?page=${page}&size=${pageSize}`);
     const data = await res.json();
     const defaultProfileIcon = "/static/images/profile_icon.png";
 
     if (res.ok && data.employees && data.employees.length > 0) {
       userRows.innerHTML = "";
+      totalEmployees = data.total;
+      currentPage = data.page;
+
       data.employees.forEach(emp => {
         const row = document.createElement("div");
         row.className = "flex items-center bg-white/[0.03] rounded-3xl border border-white/10 px-4 py-2 hover:bg-white/5 transition-all text-white";
@@ -106,13 +121,26 @@ async function fetchUsers() {
         `;
         userRows.appendChild(row);
       });
+      updatePaginationUI();
     } else {
       userRows.innerHTML = `<p class="text-center text-slate-400 py-4">No users found.</p>`;
+      totalEmployees = 0;
+      updatePaginationUI();
     }
   } catch (err) {
     userRows.innerHTML = `<p class="text-center text-red-500 py-4">Error connecting to server.</p>`;
     console.error("fetchUsers error:", err);
   }
+}
+
+function updatePaginationUI() {
+  const totalPages = Math.ceil(totalEmployees / pageSize) || 1;
+
+  if (currentPageNumDisplay) currentPageNumDisplay.innerText = currentPage;
+  if (totalPageNumDisplay) totalPageNumDisplay.innerText = totalPages;
+
+  if (prevPageBtn) prevPageBtn.disabled = (currentPage <= 1);
+  if (nextPageBtn) nextPageBtn.disabled = (currentPage >= totalPages);
 }
 
 // --- Club Management Functions ---
@@ -198,7 +226,8 @@ if (usersTab) {
   usersTab.addEventListener("click", () => {
     setActiveTab(usersTab);
     showSection(employeesSection);
-    fetchUsers();
+    currentPage = 1;
+    fetchUsers(currentPage);
   });
 }
 
@@ -226,6 +255,24 @@ if (logoutTab) {
 
 if (addUserBtn) {
   addUserBtn.addEventListener("click", () => { window.location.href = "/employee_upload/"; });
+}
+
+// --- Pagination Listeners ---
+if (prevPageBtn) {
+  prevPageBtn.addEventListener("click", () => {
+    if (currentPage > 1) {
+      fetchUsers(currentPage - 1);
+    }
+  });
+}
+
+if (nextPageBtn) {
+  nextPageBtn.addEventListener("click", () => {
+    const totalPages = Math.ceil(totalEmployees / pageSize);
+    if (currentPage < totalPages) {
+      fetchUsers(currentPage + 1);
+    }
+  });
 }
 
 if (addUserToClubBtn) {

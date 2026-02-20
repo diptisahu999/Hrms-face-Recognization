@@ -91,8 +91,8 @@ async def get_all_employees(db: AsyncSession) -> List[models.Employee]:
     return result.scalars().all()
 
 
-# Fetch employees without Image
-async def get_all_employee(db: AsyncSession):
+# Fetch employees without Image (with pagination)
+async def get_all_employee(db: AsyncSession, skip: int = 0, limit: int = 5):
     result = await db.execute(
         select(
             models.Employee.id,
@@ -100,8 +100,17 @@ async def get_all_employee(db: AsyncSession):
             models.Employee.member_code,
             models.Employee.image_path
         )
+        .offset(skip)
+        .limit(limit)
     )
-    return result.all()
+    # Using .mappings().all() to return a list of dict-like objects for easy JSON serialization
+    return result.mappings().all()
+
+async def get_employee_count(db: AsyncSession) -> int:
+    """Returns the total number of employees."""
+    from sqlalchemy import func
+    result = await db.execute(select(func.count(models.Employee.id)))
+    return result.scalar()
 
 
 
