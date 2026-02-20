@@ -112,7 +112,7 @@ async def create_recognition_log(
     db: AsyncSession, 
     emp_id: str, 
     name: str, 
-    member_code: str,
+    member_code: Optional[str] = None,
     club_id: Optional[int] = None
 ):
     """Creates a new entry in the recognition_log table."""

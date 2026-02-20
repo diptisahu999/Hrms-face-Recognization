@@ -55,9 +55,9 @@ def make_response(status, code, flag, message, data=None):
 
 # --- API Endpoints ---
 
-# @app.get("/", response_class=HTMLResponse)
-# async def read_root(request: Request):
-#     return templates.TemplateResponse("index.html", {"request": request})
+@app.get("/face_scan", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -261,10 +261,24 @@ async def recognize(
                 default=None
             )
             if best_face:
-                message = f"Match found: {employee.name}"
+                # Capture values before commit potentially expires the object
+                emp_name = employee.name
+                emp_id = employee.id
+                emp_member_code = employee.member_code
+
+                # Log the recognition
+                await crud.create_recognition_log(
+                    db=db,
+                    emp_id=emp_id,
+                    name=emp_name,
+                    member_code=emp_member_code
+                )
+                logging.info(f"✅ Recognition logged for {emp_name}")
+
+                message = f"Match found: {emp_name}"
                 return JSONResponse(
                     status_code=200,
-                    content=make_response(1, 1, True, message, data={"name": employee.name, "score": best_face["score"]})
+                    content=make_response(1, 1, True, message, data={"name": emp_name, "score": best_face["score"]})
                 )
         
         return JSONResponse(
