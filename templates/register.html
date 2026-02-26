@@ -191,15 +191,15 @@
         });
 
         const data = await res.json();
-        if (res.ok) {
+        if (res.ok && data.FLAG) {
           responseMessage.className = "mt-6 text-emerald-400 font-medium tracking-wide";
-          responseMessage.textContent = data.message || "Upload successful!";
+          responseMessage.textContent = data.MESSAGE || "Upload successful!";
           form.reset();
           preview.innerHTML = "";
           document.querySelector('label[for="pictures"] span').textContent = 'Choose Files';
         } else {
           responseMessage.className = "mt-6 text-rose-400 font-medium tracking-wide";
-          responseMessage.textContent = data.detail || "Upload failed!";
+          responseMessage.textContent = data.MESSAGE || data.detail || "Upload failed!";
         }
       } catch (err) {
         responseMessage.className = "mt-6 text-rose-400 font-medium tracking-wide";

@@ -172,17 +172,22 @@ def detect_faces_with_fallback(image_bgr: np.ndarray) -> List[dict]:
         rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
         mtcnn_results = detector.detect_faces(rgb)
         if mtcnn_results:
-            logging.debug("MTCNN detected %d faces", len(mtcnn_results))
-            # normalize box to [x,y,w,h]
-            faces_out.extend(mtcnn_results)
-            return faces_out
+            # Filter by confidence (e.g., > 0.95)
+            confident_faces = [f for f in mtcnn_results if (f.get("confidence") or 0) > 0.95]
+            if confident_faces:
+                logging.debug("MTCNN detected %d confident faces", len(confident_faces))
+                faces_out.extend(confident_faces)
+                return faces_out
+            else:
+                logging.debug("MTCNN detected faces but none met confidence threshold")
     except Exception:
         logging.exception("MTCNN detection failed, falling back to Haar")
 
     # Haar fallback
     try:
         gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
-        haar_faces = haar_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3, minSize=(MIN_FACE_SIZE, MIN_FACE_SIZE))
+        # Increased minNeighbors from 3 to 6 for better accuracy/lower false positives
+        haar_faces = haar_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=6, minSize=(MIN_FACE_SIZE, MIN_FACE_SIZE))
         for (x, y, w, h) in haar_faces:
             faces_out.append({"box": [int(x), int(y), int(w), int(h)], "confidence": None, "keypoints": {}})
         logging.debug("Haar detected %d faces", len(haar_faces))

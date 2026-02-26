@@ -145,7 +145,7 @@ async def upload_images(
         if avg_embedding is None:
             return JSONResponse(
                 status_code=200,
-                content=make_response(0, 2, False, "Failed to generate embeddings. No faces found or invalid images.")
+                content=make_response(0, 2, False, "upload the human face")
             )
 
         existing_employee = await crud.get_employee_by_id(db, id)
