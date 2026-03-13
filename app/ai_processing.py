@@ -16,6 +16,7 @@ where `stored_embeddings` are already normalized float32 numpy arrays.
 
 import logging
 import os
+import time
 from typing import Optional, Tuple, List
 
 import cv2
@@ -34,7 +35,11 @@ if not hasattr(settings, "MODEL_PATH"):
     raise RuntimeError("settings.MODEL_PATH is required")
 
 logging.info("Loading ArcFace ONNX model: %s", settings.MODEL_PATH)
-ort_session = ort.InferenceSession(settings.MODEL_PATH)
+# Optimize thread usage for CPU stability
+opts = ort.SessionOptions()
+opts.intra_op_num_threads = 1
+opts.inter_op_num_threads = 1
+ort_session = ort.InferenceSession(settings.MODEL_PATH, sess_options=opts)
 logging.info("ArcFace model loaded")
 
 logging.info("Initializing MTCNN detector")
@@ -213,6 +218,7 @@ def detect_and_recognize_faces(image_bgr: np.ndarray, cache_data: Tuple) -> List
         logging.warning("No stored embeddings available")
         return []
 
+    start_time = time.perf_counter()
     faces = detect_faces_with_fallback(image_bgr)
     if not faces:
         return []
@@ -255,6 +261,9 @@ def detect_and_recognize_faces(image_bgr: np.ndarray, cache_data: Tuple) -> List
             "box": [int(x) for x in box] if box is not None else None,
             "score": best_score
         })
+
+    end_time = time.perf_counter()
+    logging.info(f"AI: Processed {len(faces)} faces in {end_time - start_time:.3f}s")
 
     return results
 

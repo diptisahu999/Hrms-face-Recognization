@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     RECOGNITION_THRESHOLD: float = 0.35
     
     SCANNER_BASE_URL: str = "http://localhost:8000"
+    
+    # --- Performance Tuning ---
+    MAX_CONCURRENT_AI_TASKS: int = 1  # Limits CPU/RAM exhaustion during spikes
 
     class Config:
         # If you use a .env file, settings will be loaded from it

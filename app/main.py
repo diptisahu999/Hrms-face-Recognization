@@ -2,6 +2,7 @@
 
 import logging
 import time
+import asyncio
 import numpy as np
 import cv2
 from fastapi import FastAPI, File, Form, UploadFile, Depends, HTTPException, Request, BackgroundTasks
@@ -24,6 +25,10 @@ app = FastAPI(title="Face Recognition API")
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+# --- Concurrency Control ---
+# Limit the number of concurrent AI recognition tasks to avoid 502/server hangs.
+AI_SEMAPHORE = asyncio.Semaphore(settings.MAX_CONCURRENT_AI_TASKS)
 
 # --- CORS Middleware ---
 app.add_middleware(
@@ -259,10 +264,22 @@ async def recognize(
             [employee.member_code]
         )
 
-        # 5. Run detection and recognition
-        recognized_faces = await run_in_threadpool(
-            detect_and_recognize_faces, image_bgr=image_bgr, cache_data=local_cache
-        )
+        # 5. Run detection and recognition with concurrency limit
+        async with AI_SEMAPHORE:
+            try:
+                recognized_faces = await asyncio.wait_for(
+                    run_in_threadpool(
+                        detect_and_recognize_faces,
+                        image_bgr=image_bgr,
+                        cache_data=local_cache
+                    ),
+                    timeout=10
+                )
+            except asyncio.TimeoutError:
+                return JSONResponse(
+                    status_code=200,
+                    content=make_response(0, 0, False, "Recognition timeout")
+                )
 
         # 6. Check for match
         if recognized_faces:
@@ -342,9 +359,10 @@ async def recognize_by_url(
             logging.warning("Recognition attempted but embedding cache is empty.")
             return {"faces": []}
             
-        recognized_faces = await run_in_threadpool(
-            detect_and_recognize_faces, image_bgr=image_bgr, cache_data=cache_data
-        )
+        async with AI_SEMAPHORE:
+            recognized_faces = await run_in_threadpool(
+                detect_and_recognize_faces, image_bgr=image_bgr, cache_data=cache_data
+            )
 
         if recognized_faces:
             best_face = max(
@@ -412,9 +430,10 @@ async def recognize(
             logging.warning("Recognition attempted but embedding cache is empty.")
             return {"faces": []}
             
-        recognized_faces = await run_in_threadpool(
-            detect_and_recognize_faces, image_bgr=image_bgr, cache_data=cache_data
-        )
+        async with AI_SEMAPHORE:
+            recognized_faces = await run_in_threadpool(
+                detect_and_recognize_faces, image_bgr=image_bgr, cache_data=cache_data
+            )
 
         if recognized_faces:
             best_face = max(

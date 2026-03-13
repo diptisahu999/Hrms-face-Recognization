@@ -6,3 +6,6 @@ venv/
 model/
 .model/
 uploads/
+scripts/
+app/*.zip
+app/*.tar.gz
